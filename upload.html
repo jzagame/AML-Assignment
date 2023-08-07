@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" />
+	<script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<meta charset=utf-8 />
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+ <style>
+    
+      body {
+        font-family: sans-serif;
+        background-color: #eeeeee;
+      }
+
+      
+      .file-upload {
+        background-color: #ffffff;
+        width: 800px;
+        height: 300px;
+        margin: 0 auto;
+        padding: 20px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        border-radius: 10px;
+      }
+      .image_url_button{
+        background:#1FB264;
+      
+      }
+      .table {
+        text-align: center;
+      }
+      .file-upload-content {
+        display: none;
+        margin-top: 10px;
+        border: 1px dashed #1FB264;
+        position: relative;
+        height: 180px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .file-upload-image {
+        max-height: 800px;
+        max-width: 120px;
+        vertical-align: middle;
+      }
+
+      .file-upload-input {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        outline: none;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .image-upload-wrap {
+        margin-top: 10px;
+        border: 1px dashed #1FB264;
+        position: relative;
+        height: 180px;
+      }
+
+
+      .image-title-wrap {
+        padding: 0 15px 15px 15px;
+        color: #222;
+      }
+
+      .drag-text {
+        text-align: center;
+      }
+
+      .drag-text h3 {
+        font-weight: 100;
+        text-transform: uppercase;
+        color: #818e87;
+        font-size: medium;
+        padding: 80px 0;
+      }
+
+      .result-img {
+        max-height: 500px;
+        max-width: 500px;
+        margin: auto;
+        padding: 10px;
+      }
+      .predict_btn {
+        background-color: #c2fbd7;
+        border-radius: 100px;
+        box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
+        color: green;
+        cursor: pointer;
+        display: inline-block;
+        font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+        padding: 7px 20px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 250ms;
+        border: 0;
+        font-size: 16px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+      }
+
+      .predict_btn:hover {
+        box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
+        transform: scale(1.05) rotate(-1deg);
+      }
+	</style>
+</head>
+
+<body>
+  <form class = "file-form" action="/success" method="post", enctype="multipart/form-data">
+      <div class="file-upload">
+          <h2 style = "color: #58755D; ">Identify Plants</h2>
+        <div class="image-upload-wrap">
+         <input class="file-upload-input" type='file' name = "file" onchange="readURL(this);" accept="image/* capture=camera" />
+          <div class="drag-text">
+            <h3>Drag and drop a file or select add Image</h3>
+          </div>
+        </div>
+        <div class="file-upload-content">
+          <img class="file-upload-image" src="#" alt="your image"/>
+        </div>
+        <div align="center" style="padding: 5px 0;">
+          <button class="predict_btn" type="submit">Predict</button>
+        </div>  
+      </div>
+    
+    {% if predictions %}
+    <br/><br/>
+    <div class="table">
+      <table width="80%" align= "center">
+        <tr>
+          <th width="50%">
+            <div style="width: 560px; float: left; border-color: #760000;">
+              <div class="card " style="min-height: 450px;  border-color: #76d7a4;">
+                  <div class="card-header  text-white" style = "background: #76d7a4; border-color: #76d7a4;" >Image to be Identified </div>
+                  <div class="card-body " style="font-size: 14px; border-color: #76d7a4;">
+                    <img class = "result-img" src="data:image/jpeg;base64,{{ img_data }}"/>
+                    <br/>
+                    {{img_name}}
+                  </div>
+              </div>
+          </div>
+          </th>
+          <th width="50%">
+             <div style="width: 560px; float: left; border-color: #760000;">
+              <div class="card " style="min-height: 450px;  border-color: #76d7a4;">
+                  <div class="card-header  text-white" style = "background: #76d7a4; border-color: #76d7a4;" > Model Prediction</div>
+                  <div class="card-body " style="font-size: 14px; border-color: #76d7a4;">
+                    <div class = "info">
+              <row style = "width: 100% ; display: flex; justify-content: center;">
+              </row>
+              <row style = "width: 100%; display: flex; justify-content: center;">
+                  <table class="styled-table" width = 560px>
+                      <thead>
+                          <tr bgcolor = "#F0EEEE">
+                              <th>Rank</th>
+                              <th>Class</th>
+                              <th>Probability</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>1st</td>
+                              <td>{{class1_name}}</td>
+                              <td>{{ predictions.prob1 }} %</td>
+                          </tr>
+                          <tr bgcolor = "#F0EEEE">
+                              <td>2nd</td>
+                              <td>{{class2_name}}</td>                                                         
+                              <td>{{ predictions.prob2 }} %</td>                                                      
+                          </tr>                                                                                                               
+                          <tr>
+                              <td>3rd</td>
+                              <td>{{class3_name}}</td>
+                              <td>{{ predictions.prob3 }} %</td>
+                          </tr>
+                           <tr bgcolor = "#F0EEEE">
+                              <td>4th</td>
+                              <td>{{class4_name}}</td>
+                              <td>{{ predictions.prob4 }} %</td>
+                          </tr>
+                           <tr>
+                              <td>5th</td>
+                              <td>{{class5_name}}</td>
+                              <td>{{ predictions.prob5 }} %</td>
+                          </tr>
+                            </tbody>
+                         </table>
+                    </row>
+                  </div>
+                </div>  
+                  </div>
+              </div>
+          </div>
+          </th>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <div style="width: 1200px; float: left; border-color: #760000;">
+              <div class="card " style="min-height: 450px;  border-color: #76d7a4;">
+                  <div class="card-header  text-white" style = "background: #76d7a4; border-color: #76d7a4;" >Image: {{sample_results_name}} </div>
+                  <div class="card-body " style="font-size: 14px; border-color: #76d7a4;">
+                    <img class = "result-img" src="data:image/jpeg;base64,{{ img_data1 }}"/>
+                    <img class = "result-img" src="data:image/jpeg;base64,{{ img_data2 }}"/>
+                    <img class = "result-img" src="data:image/jpeg;base64,{{ img_data3 }}"/>
+                  </div>
+              </div>
+          </div>
+          </td>
+        </tr>
+      </table>
+      </div>
+    {% endif %}
+    </form>
+    
+  
+</body>
+<script>
+   function readURL(input) {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+
+          reader.onload = function(e) {
+            $('.image-upload-wrap').hide();
+            $('.file-upload-image').attr('src', e.target.result);
+            $('.file-upload-content').show();
+            $('.image-title').html(input.files[0].name);
+          };
+
+          reader.readAsDataURL(input.files[0]);
+
+        } else {
+          removeUpload();
+        }
+    }
+</script>
+<script>
+  $("#image_url").on("input", function(){
+      if ($("#image_url").val() == "") {
+          $("#image_url_identify").attr("disabled", true);
+      }
+      else {
+          $("#image_url_identify").attr("disabled", false);
+      }
+  });
+  
+  
+  
+  </script>
+</html>
